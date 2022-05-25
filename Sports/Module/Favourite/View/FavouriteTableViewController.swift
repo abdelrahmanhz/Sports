@@ -52,6 +52,8 @@ class FavouriteTableViewController: UITableViewController  {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "favCell", for: indexPath) as! CustomFavouriteCell
+        
+        cell.layer.cornerRadius = 20
         let imageUrl = URL(string: favItems?[indexPath.row].strBadge ?? "")
         cell.leagueImage.kf.setImage(with: imageUrl,
                                     placeholder: UIImage(named: "default.png") ,
@@ -64,6 +66,15 @@ class FavouriteTableViewController: UITableViewController  {
         return cell
     }
     
+    override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.alpha = 0
+        let transform = CATransform3DTranslate(CATransform3DIdentity, -250, 20, 0)
+        cell.layer.transform = transform
+        UITableView.animate(withDuration: 1.0) {
+            cell.alpha = 1
+            cell.layer.transform = CATransform3DIdentity
+        }
+    }
 
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -91,16 +102,16 @@ class FavouriteTableViewController: UITableViewController  {
 
         override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-            monitor.pathUpdateHandler = { pathUpdateHandler  in
+            monitor.pathUpdateHandler = { [weak self] pathUpdateHandler  in
                if pathUpdateHandler.status == .satisfied {
                 DispatchQueue.main.async {
-                    let leagueDetails = self.storyboard?.instantiateViewController(identifier: "leagueDetailsScreen") as! LeagueDetailsViewController
-                    leagueDetails.leagueName = self.favItems?[indexPath.row].strLeague
-                    leagueDetails.leagueId = self.favItems?[indexPath.row].idLeague as! String
-                    leagueDetails.selectedLeague = self.favItems?[indexPath.row]
+                    let leagueDetails = self?.storyboard?.instantiateViewController(identifier: "leagueDetailsScreen") as! LeagueDetailsViewController
+                    leagueDetails.leagueName = self?.favItems?[indexPath.row].strLeague
+                    leagueDetails.leagueId = self?.favItems?[indexPath.row].idLeague as! String
+                    leagueDetails.selectedLeague = self?.favItems?[indexPath.row]
                     leagueDetails.modalPresentationStyle = .overFullScreen
                     
-                    self.present(leagueDetails, animated: true, completion: nil)
+                    self?.present(leagueDetails, animated: true, completion: nil)
                 }
                
                 }
@@ -109,7 +120,7 @@ class FavouriteTableViewController: UITableViewController  {
                 DispatchQueue.main.async {
                     let alert : UIAlertController = UIAlertController(title: "ERROR", message: "Please check your internet connection", preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .destructive, handler: nil))
-                    self.present(alert , animated: true , completion: nil)
+                    self?.present(alert , animated: true , completion: nil)
                                 
                     }
                 }
@@ -119,6 +130,7 @@ class FavouriteTableViewController: UITableViewController  {
         }
  
 
+    
     @IBAction func clearBtn(_ sender: UIBarButtonItem) {
         let alert = UIAlertController(title: "Removing Alert", message: "Remove all leagues from favourite list?", preferredStyle: .alert)
                    alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { (action) in
